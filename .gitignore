@@ -1,1 +1,6 @@
+cache/
+out/
+
+.env
+
 .idea
