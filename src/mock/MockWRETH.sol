@@ -2,14 +2,15 @@
 pragma solidity ^0.8.13;
 
 import "../WRETH.sol";
+import "../../lib/openzeppelin-contracts/contracts/interfaces/IERC20.sol";
 
 contract MockWRETH is WRETH {
-    constructor(ERC20 rETH, RocketOvmPriceOracleInterface oracle) WRETH(rETH, oracle) {}
+    constructor(IERC20 rETH, RocketOvmPriceOracleInterface oracle) WRETH(rETH, oracle) {}
 
     function mockMint(address _to, uint256 _amount) external {
-        supplyInTokens += _amount;
+        tokenTotalSupply += _amount;
         unchecked {
-            tokenBalance[_to] += _amount;
+            tokenBalanceOf[_to] += _amount;
         }
     }
 }
