@@ -27,6 +27,7 @@ contract wrETHTest is Test {
     //
     // Helpers
     //
+
     function mint(address to, uint256 amountTokens) internal {
         rETH.mint(to, amountTokens);
         vm.prank(to);

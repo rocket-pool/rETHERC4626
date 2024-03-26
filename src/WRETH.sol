@@ -1,15 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 
-import "../lib/openzeppelin-contracts/contracts/interfaces/IERC20.sol";
-import "./interface/RocketOvmPriceOracle.sol";
-
-import {Test, console} from "forge-std/Test.sol";
+import "./interface/IWRETH.sol";
 
 /// @author Kane Wallmann (Rocket Pool)
 /// @author ERC20 modified from Solmate (https://github.com/transmissions11/solmate/blob/main/src/tokens/ERC20.sol)
 /// @author Modified from Uniswap (https://github.com/Uniswap/uniswap-v2-core/blob/master/contracts/UniswapV2ERC20.sol)
-contract WRETH is IERC20 {
+contract WRETH is IWRETH {
     IERC20 immutable public rETH;
     RocketOvmPriceOracleInterface immutable public oracle;
 
@@ -50,6 +47,7 @@ contract WRETH is IERC20 {
         oracle = _oracle;
         // Record the initial rate
         rate = oracle.rate();
+        require(rate != 0);
         // Domain separator
         INITIAL_CHAIN_ID = block.chainid;
         INITIAL_DOMAIN_SEPARATOR = computeDomainSeparator();
@@ -66,6 +64,7 @@ contract WRETH is IERC20 {
         if (newRate == rate) {
             return;
         }
+        require(newRate != 0);
         // Emit event
         emit Rebase(rate, newRate);
         // Update the rate
@@ -74,7 +73,7 @@ contract WRETH is IERC20 {
 
     /// @notice Transfers rETH from the caller and mints wrETH
     /// @param _amountTokens Amount to mint denominated in rETH
-    function mint(uint256 _amountTokens) external {
+    function mint(uint256 _amountTokens) public returns (uint256) {
         require (_amountTokens > 0);
         // Calculate the value denominated in ETH
         uint256 amountWreth = wrethForTokens(_amountTokens);
@@ -88,11 +87,13 @@ contract WRETH is IERC20 {
         }
         // Emit event
         emit Transfer(address(0), msg.sender, amountWreth);
+        // Return amount of wrETH minted
+        return amountWreth;
     }
 
     /// @notice Burns wrETH for rETH
     /// @param _amountWreth Amount of tokens to burn denominated in wrETH
-    function burn(uint256 _amountWreth) external {
+    function burn(uint256 _amountWreth) external returns (uint256) {
         require (_amountWreth > 0);
         // Calculate the value denominated in rETH
         uint256 amountTokens = tokensForWreth(_amountWreth);
@@ -106,11 +107,13 @@ contract WRETH is IERC20 {
         }
         // Emit event
         emit Transfer(msg.sender, address(0), _amountWreth);
+        // Return amount of rETH returned
+        return amountTokens;
     }
 
     /// @notice Burns wrETH for rETH
     /// @param _amountTokens Amount of tokens to burn denominated in rETH
-    function burnTokens(uint256 _amountTokens) public {
+    function burnTokens(uint256 _amountTokens) public returns (uint256) {
         uint256 amountWreth = wrethForTokens(_amountTokens);
         // Transfer that number of token to this contract
         require(rETH.transfer(msg.sender, _amountTokens), "Transfer failed");
@@ -122,6 +125,8 @@ contract WRETH is IERC20 {
         }
         // Emit event
         emit Transfer(msg.sender, address(0), amountWreth);
+        // Returns amount of wrETH burned
+        return amountWreth;
     }
 
     /// @notice Burns the caller's full balance of wrETH and returns rETH
@@ -267,12 +272,12 @@ contract WRETH is IERC20 {
     //
 
     /// @dev Calculates the amount of rETH the supplied value of ETH is worth
-    function tokensForWreth(uint256 _eth) internal view returns (uint256) {
+    function tokensForWreth(uint256 _eth) public view returns (uint256) {
         return _eth * 1 ether / rate;
     }
 
     /// @dev Calculates the amount of ETH the supplied value of rETH is worth
-    function wrethForTokens(uint256 _tokens) internal view returns (uint256) {
+    function wrethForTokens(uint256 _tokens) public view returns (uint256) {
         return _tokens * rate / 1 ether;
     }
 
