@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 
-import "../lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC4626.sol";
-import "../lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+import "openzeppelin-contracts/contracts/token/ERC20/extensions/ERC4626.sol";
+import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "./interface/IWRETH.sol";
 
 /*

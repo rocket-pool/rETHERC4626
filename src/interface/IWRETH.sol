@@ -2,11 +2,11 @@
 pragma solidity ^0.8.24;
 
 import "../../lib/openzeppelin-contracts/contracts/interfaces/IERC20.sol";
-import "./RocketOvmPriceOracle.sol";
+import "./PriceOracleInterface.sol";
 
 interface IWRETH is IERC20 {
     function rETH() external view returns (IERC20);
-    function oracle() external view returns (RocketOvmPriceOracleInterface);
+    function oracle() external view returns (PriceOracleInterface);
     function rate() external view returns (uint256);
     function tokenTotalSupply() external view returns (uint256);
     function tokenBalanceOf(address) external view returns (uint256);

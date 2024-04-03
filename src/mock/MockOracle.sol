@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import "../interface/RocketOvmPriceOracle.sol";
+import "../interface/PriceOracleInterface.sol";
 
-contract MockOracle is RocketOvmPriceOracleInterface {
+contract MockOracle is PriceOracleInterface {
     constructor (uint256 _rate) {
         rate = _rate;
     }

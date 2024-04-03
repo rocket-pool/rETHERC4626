@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 
+import "./interface/PriceOracleInterface.sol";
 import "./interface/IWRETH.sol";
 
 /// @author Kane Wallmann (Rocket Pool)
@@ -8,7 +9,7 @@ import "./interface/IWRETH.sol";
 /// @author Modified from Uniswap (https://github.com/Uniswap/uniswap-v2-core/blob/master/contracts/UniswapV2ERC20.sol)
 contract WRETH is IWRETH {
     IERC20 immutable public rETH;
-    RocketOvmPriceOracleInterface immutable public oracle;
+    PriceOracleInterface immutable public oracle;
 
     // ERC20 constants
     uint256 constant public decimals = 18;
@@ -42,7 +43,7 @@ contract WRETH is IWRETH {
 
     /// @param _rETH Address for rETH token
     /// @param _oracle Address for the rETH rate oracle
-    constructor(IERC20 _rETH, RocketOvmPriceOracleInterface _oracle) {
+    constructor(IERC20 _rETH, PriceOracleInterface _oracle) {
         rETH = _rETH;
         oracle = _oracle;
         // Record the initial rate
