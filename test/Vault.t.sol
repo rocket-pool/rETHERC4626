@@ -8,14 +8,14 @@ import "../lib/openzeppelin-contracts/contracts/interfaces/IERC20.sol";
 import "../src/WRETH.sol";
 import "../src/mock/MockRETH.sol";
 import "../src/mock/MockOracle.sol";
-import "../src/WRETHVault.sol";
+import "../src/RETHERC4626.sol";
 
 /// @dev Tests for the ERC-4626 vault
 contract VaultTest is Test {
     MockRETH public rETH;
     WRETH public wrETH;
     MockOracle public oracle;
-    WRETHVault public vault;
+    RETHERC4626 public vault;
 
     address public alice = vm.addr(1);
     address public bob = vm.addr(2);
@@ -24,7 +24,7 @@ contract VaultTest is Test {
         oracle = new MockOracle(1 ether);
         rETH = new MockRETH();
         wrETH = new WRETH(IERC20(address(rETH)), oracle);
-        vault = new WRETHVault(wrETH);
+        vault = new RETHERC4626(wrETH);
     }
 
     //
