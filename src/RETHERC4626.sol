@@ -20,7 +20,7 @@ contract RETHERC4626 is ERC4626 {
     constructor(IWRETH _wrETH) ERC4626(IERC20(_wrETH)) ERC20("ERC4626-Wrapped wrETH", "wwrETH") {
         rETH = _wrETH.rETH();
         wrETH = _wrETH;
-        rETH.approve(address(wrETH), type(uint256).max);
+        require(rETH.approve(address(wrETH), type(uint256).max), "Approval failed");
     }
 
     //
@@ -99,7 +99,7 @@ contract RETHERC4626 is ERC4626 {
         // Burn wrETH back to rETH
         uint256 tokens = wrETH.burn(assets);
         // Transfer rETH back to caller
-        rETH.transfer(caller, tokens);
+        require(rETH.transfer(caller, tokens), "Transfer failed");
         // Burn vault tokens
         _burn(owner, shares);
         emit Withdraw(caller, receiver, owner, assets, shares);
