@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.24;
+pragma solidity 0.8.24;
 
 import "openzeppelin-contracts/contracts/token/ERC20/extensions/ERC4626.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
@@ -12,6 +12,8 @@ contract RETHERC4626 is ERC4626 {
 
     IERC20 immutable public rETH;
     IWRETH immutable public wrETH;
+
+    uint256 public tokenBalance = 0;
 
     //
     // Constructor
@@ -44,6 +46,7 @@ contract RETHERC4626 is ERC4626 {
         uint256 shares = previewDeposit(assets);
         // Wrap the rETH in wrETH, sending the wrETH here
         assert(wrETH.mint(amountReth) == assets);
+        tokenBalance += amountReth;
         // Mint vault tokens
         _mint(receiver, shares);
         emit Deposit(msg.sender, receiver, assets, shares);
@@ -98,6 +101,7 @@ contract RETHERC4626 is ERC4626 {
         }
         // Burn wrETH back to rETH
         uint256 tokens = wrETH.burn(assets);
+        tokenBalance -= tokens;
         // Transfer rETH back to caller
         require(rETH.transfer(caller, tokens), "Transfer failed");
         // Burn vault tokens
@@ -111,17 +115,25 @@ contract RETHERC4626 is ERC4626 {
 
     /// @dev Internal conversion function (from assets to shares) with support for rounding direction.
     function _convertToShares(uint256 assets, Math.Rounding rounding) internal override view virtual returns (uint256) {
-        // By doing the calculation in this order instead of the default way we gain some precision
-        uint256 totalAssets = wrETH.tokenBalanceOf(address(this));
-        uint256 ownedTokens = assets.mulDiv(totalSupply() + 10 ** _decimalsOffset(), totalAssets + 1, rounding);
-        return wrETH.tokensForWreth(ownedTokens);
+        // The conversion is assets (ETH) -> tokens (rETH) -> shares
+        uint256 rate = wrETH.rate();
+        uint256 tokens = assets.mulDiv(1 ether, rate, rounding);
+        return tokens.mulDiv(totalSupply() + 10 ** _decimalsOffset(), tokenBalance + 1, rounding);
     }
 
     /// @dev Internal conversion function (from shares to assets) with support for rounding direction.
     function _convertToAssets(uint256 shares, Math.Rounding rounding) internal override view virtual returns (uint256) {
-        // By doing the calculation in this order instead of the default way we gain some precision
-        uint256 totalAssets = wrETH.tokenBalanceOf(address(this));
-        uint256 ownedTokens = shares.mulDiv(totalAssets + 1, totalSupply() + 10 ** _decimalsOffset(), rounding);
-        return wrETH.wrethForTokens(ownedTokens);
+        // The conversion is shares -> tokens (rETH) -> assets (ETH)
+        uint256 tokens = shares.mulDiv(tokenBalance + 1, totalSupply() + 10 ** _decimalsOffset(), rounding);
+        uint256 rate = wrETH.rate();
+        return tokens.mulDiv(rate, 1 ether, rounding);
+    }
+
+    /// @dev Override super implementation to include check for 0 shares
+    function _deposit(address caller, address receiver, uint256 assets, uint256 shares) internal override virtual {
+        // Prevent accidental deposit resulting in 0 shares
+        require(shares > 0, "Zero shares");
+        // Call super implementation
+        ERC4626._deposit(caller, receiver, assets, shares);
     }
 }
