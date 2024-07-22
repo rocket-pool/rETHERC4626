@@ -90,6 +90,10 @@ contract RETHERC4626 is ERC4626 {
         return assets;
     }
 
+    function totalAssets() public view override virtual returns (uint256) {
+        return wrETH.wrethForTokens(tokenBalance);
+    }
+
     //
     // Internals
     //
@@ -129,11 +133,31 @@ contract RETHERC4626 is ERC4626 {
         return tokens.mulDiv(rate, 1 ether, rounding);
     }
 
-    /// @dev Override super implementation to include check for 0 shares
+    /// @dev Override super implementation to include check for 0 shares and update internal token balance
     function _deposit(address caller, address receiver, uint256 assets, uint256 shares) internal override virtual {
         // Prevent accidental deposit resulting in 0 shares
         require(shares > 0, "Zero shares");
         // Call super implementation
         ERC4626._deposit(caller, receiver, assets, shares);
+        // Update token balance
+        tokenBalance += wrETH.tokensForWreth(assets);
+    }
+
+    /// @dev Override super implementation to also update internal token balance
+    function _withdraw(
+        address caller,
+        address receiver,
+        address owner,
+        uint256 assets,
+        uint256 shares
+    ) internal override virtual {
+        // Call super implementation
+        ERC4626._withdraw(caller, receiver, owner, assets, shares);
+        // Update token balance
+        tokenBalance -= wrETH.tokensForWreth(assets);
+    }
+
+    function _decimalsOffset() internal view override virtual returns (uint8) {
+        return 5;
     }
 }
