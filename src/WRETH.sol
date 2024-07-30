@@ -102,10 +102,10 @@ contract WRETH is IWRETH {
         // Transfer that number of token to this contract
         require(rETH.transfer(msg.sender, amountTokens), "Transfer failed");
         // Burn wrETH
-        tokenTotalSupply -= amountTokens;
-        // Cannot overflow because the sum of all user balances can't exceed the max uint256 value
+        tokenBalanceOf[msg.sender] -= amountTokens;
+        // Cannot underflow because a user's balance will never be larger than the total supply.
         unchecked {
-            tokenBalanceOf[msg.sender] -= amountTokens;
+            tokenTotalSupply -= amountTokens;
         }
         // Emit event
         emit Transfer(msg.sender, address(0), _amountWreth);
@@ -120,10 +120,10 @@ contract WRETH is IWRETH {
         // Transfer that number of token to this contract
         require(rETH.transfer(msg.sender, _amountTokens), "Transfer failed");
         // Burn wrETH
-        tokenTotalSupply -= _amountTokens;
-        // Cannot overflow because the sum of all user balances can't exceed the max uint256 value
+        tokenBalanceOf[msg.sender] -= _amountTokens;
+        // Cannot underflow because a user's balance will never be larger than the total supply.
         unchecked {
-            tokenBalanceOf[msg.sender] -= _amountTokens;
+            tokenTotalSupply -= _amountTokens;
         }
         // Emit event
         emit Transfer(msg.sender, address(0), amountWreth);

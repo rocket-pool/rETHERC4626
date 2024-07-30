@@ -47,7 +47,7 @@ contract wrETHTest is Test {
     }
 
     //
-    // Rebasing logic
+    // Misc
     //
 
     function testFail_MintZero() public {
@@ -57,6 +57,22 @@ contract wrETHTest is Test {
     function testFail_BurnZero() public {
         wrETH.burn(0);
     }
+
+    function testFail_BurnFromOther() public {
+        mint(alice, 10000);
+        vm.prank(bob);
+        wrETH.burnTokens(1);
+    }
+
+    function testFail_BurnExceedingBalance() public {
+        mint(alice, 10000);
+        vm.prank(alice);
+        wrETH.burnTokens(10001);
+    }
+
+    //
+    // Rebasing logic
+    //
 
     function test_MintAndBurn() public {
         // Mint some wrETH
