@@ -83,10 +83,7 @@ contract WRETH is IWRETH {
         require(rETH.transferFrom(msg.sender, address(this), _amountTokens), "Transfer failed");
         // Mint wrETH
         tokenTotalSupply += _amountTokens;
-        // Cannot overflow because the sum of all user balances can't exceed the max uint256 value
-        unchecked {
-            tokenBalanceOf[msg.sender] += _amountTokens;
-        }
+        tokenBalanceOf[msg.sender] += _amountTokens;
         // Emit event
         emit Transfer(address(0), msg.sender, amountWreth);
         // Return amount of wrETH minted
@@ -103,10 +100,7 @@ contract WRETH is IWRETH {
         require(rETH.transfer(msg.sender, amountTokens), "Transfer failed");
         // Burn wrETH
         tokenBalanceOf[msg.sender] -= amountTokens;
-        // Cannot underflow because a user's balance will never be larger than the total supply.
-        unchecked {
-            tokenTotalSupply -= amountTokens;
-        }
+        tokenTotalSupply -= amountTokens;
         // Emit event
         emit Transfer(msg.sender, address(0), _amountWreth);
         // Return amount of rETH returned
@@ -121,10 +115,7 @@ contract WRETH is IWRETH {
         require(rETH.transfer(msg.sender, _amountTokens), "Transfer failed");
         // Burn wrETH
         tokenBalanceOf[msg.sender] -= _amountTokens;
-        // Cannot underflow because a user's balance will never be larger than the total supply.
-        unchecked {
-            tokenTotalSupply -= _amountTokens;
-        }
+        tokenTotalSupply -= _amountTokens;
         // Emit event
         emit Transfer(msg.sender, address(0), amountWreth);
         // Returns amount of wrETH burned
@@ -159,10 +150,7 @@ contract WRETH is IWRETH {
         require(to != address(0));
         uint256 amountTokens = tokensForWreth(amount);
         tokenBalanceOf[msg.sender] -= amountTokens;
-        // Cannot overflow because the sum of all user balances can't exceed the max uint256 value
-        unchecked {
-            tokenBalanceOf[to] += amountTokens;
-        }
+        tokenBalanceOf[to] += amountTokens;
         emit Transfer(msg.sender, to, wrethForTokens(amountTokens));
         return true;
     }
@@ -184,10 +172,7 @@ contract WRETH is IWRETH {
         }
         uint256 amountTokens = tokensForWreth(amount);
         tokenBalanceOf[from] -= amountTokens;
-        // Cannot overflow because the sum of all user balances can't exceed the max uint256 value
-        unchecked {
-            tokenBalanceOf[to] += amountTokens;
-        }
+        tokenBalanceOf[to] += amountTokens;
         emit Transfer(from, to, wrethForTokens(amountTokens));
         return true;
     }
